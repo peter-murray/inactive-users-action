@@ -643,10 +643,13 @@ module.exports = class OrganizationUserActivity {
     return self.organizationClient.getRepositories(org)
       .then(repositories => {
         const promises = [];
+
         repositories.forEach(repo => {
-          promises.push(self.repositoryClient.getActivity(repo, since))
+          promises.push(self.repositoryClient.getActivity(repo, since));
         });
-        return Promise.all(promises)
+
+        return serializePromises(promises);
+        // return Promise.all(promises)
       })
       .then(res => {
         // Unpack the resolved promises into an object mapping repos to activity
@@ -716,6 +719,17 @@ function generateUserActivityData(data) {
   return results;
 }
 
+
+function serializePromises(promises) {
+
+  return promises.reduce((promiseChain, promiseFn) => {
+    return promiseChain.then(chainResults =>
+      promiseFn.then(currentResult =>
+        [ ...chainResults, currentResult ]
+      )
+    );
+  }, Promise.resolve([]))
+}
 
 /***/ }),
 
