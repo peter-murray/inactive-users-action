@@ -50,7 +50,15 @@ async function run() {
   // Expose the output csv file
   core.setOutput('report_csv', file);
 }
-run();
+
+async function execute() {
+  try {
+    await run();
+  } catch (err) {
+    core.setFailed(err.message);
+  }
+}
+execute();
 
 
 function getRequiredInput(name) {
