@@ -1,0 +1,26 @@
+{
+  "name": "inactive-users-action",
+  "version": "1.0.0",
+  "description": "GitHub Action for getting inactive organization members",
+  "main": "index.js",
+  "scripts": {
+    "build": "ncc build index.js",
+    "test": "mocha ./src/**/*.test.js"
+  },
+  "keywords": ["github", "organizations", "inactive users", "users"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.5",
+    "@actions/io": "^1.0.2",
+    "@octokit/plugin-retry": "^3.0.3",
+    "@octokit/plugin-throttling": "^3.3.0",
+    "@octokit/rest": "^18.0.6",
+    "@zeit/ncc": "^0.22.3",
+    "json2csv": "^5.0.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.1.3"
+  }
+}

@@ -1,0 +1,33 @@
+name: GitHub Organization User Activity Report
+description: Generates a summary of user activity for an organization
+author: Peter Murray
+
+inputs:
+  token:
+    description: GitHub Access Token with permissions for accesing Repositories and Organization data.
+    required: true
+
+  outputDir:
+    description: The output directory for the generated report(s).
+    required: true
+    default: ${{ github.workspace }}
+
+  organization:
+    description: The organization that is to be processed to detect inactive users
+    required: true
+
+  since:
+    description: A date time in ISO 8601 format YYYY-MM-DDTHH:mm:ss. If specified activity_days will be ignored.
+    required: false
+
+  activity_days:
+    description: The number of days in the past to check for activity, this will be ignored if 'since' parameter is used.
+    default: 30
+
+runs:
+  using: node12
+  main: dist/index.js
+
+branding:
+  icon: users
+  color: orange
