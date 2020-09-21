@@ -8304,14 +8304,14 @@ const RetryThrottlingOctokit = Octokit.plugin(throttling, retry);
 module.exports.create = (token, maxRetries) => {
   const MAX_RETRIES = maxRetries ? maxRetries : 3
 
-  return new RetryThrottlingOctokit({
+  const octokit =new RetryThrottlingOctokit({
     auth: `token ${token}`,
 
     throttle: {
       onRateLimit: (retryAfter, options) => {
         octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
         if (options.request.retryCount < MAX_RETRIES) {
-          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          Octokit.log.warn(`Retrying after ${retryAfter} seconds`);
           return true;
         }
       },
@@ -8325,6 +8325,8 @@ module.exports.create = (token, maxRetries) => {
       }
     }
   });
+
+  return octokit;
 }
 
 
