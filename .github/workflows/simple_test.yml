@@ -1,0 +1,27 @@
+name: Simple Test
+
+on:
+  workflow_dispatch:    
+
+jobs:
+  analyze:
+    name: Analyze Organization Activity
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Action
+        uses: actions/checkout@v2
+        
+      - name: Analyze organization
+        id: analyze_org
+        uses: ./
+        with:
+          token: ${{ secrets.OCTODEMO_TOKEN }}
+          organization: octodemo
+          activity_days: 7
+          
+      - name: Validate Outputs
+        run: |
+          echo "Outputs - csv ${{ steps.analyze_org.outputs.report_csv }}"
+ 
