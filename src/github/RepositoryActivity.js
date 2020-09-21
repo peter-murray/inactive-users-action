@@ -23,6 +23,8 @@ module.exports = class RepositoryActivity {
 
     //TODO need some validation around the parameters
 
+    console.log(`Building repository activity for: ${fullName}...`);
+
     const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
     data[UserActivityAttributes.COMMITS] = commits[fullName];
 
@@ -37,6 +39,8 @@ module.exports = class RepositoryActivity {
 
     const results = {};
     results[fullName] = data;
+
+    console.log(`  completed.`);
     return results;
 
     // Need to avoid triggering the chain so using async now

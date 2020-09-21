@@ -24,10 +24,12 @@ module.exports.create = (token, maxRetries) => {
 
       onAbuseLimit: (retryAfter, options) => {
         octokit.log.warn(`Abuse detection triggered request ${options.method} ${options.url}`);
-        if (options.request.retryCount < MAX_RETRIES) {
-          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
-          return true;
-        }
+        // Prevent any further activity as abuse trigger has very long periods to come back from
+        return false;
+        // if (options.request.retryCount < MAX_RETRIES) {
+        //   octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+        //   return true;
+        // }
       }
     }
   });
