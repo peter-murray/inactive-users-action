@@ -1067,7 +1067,6 @@ module.exports = class IssueActivity {
       return data;
     }).catch(err => {
       if (err.status === 404) {
-        console.error(`404 error trapped! ${JSON.stringify(err)}`);
         return {};
       } else {
         console.error(err)
@@ -8311,7 +8310,7 @@ module.exports.create = (token, maxRetries) => {
       onRateLimit: (retryAfter, options) => {
         octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
         if (options.request.retryCount < MAX_RETRIES) {
-          Octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
           return true;
         }
       },
@@ -8513,8 +8512,7 @@ module.exports = class Organization {
   getRepositories(org) {
     return this.octokit.paginate("GET /orgs/:org/repos", {org: org, per_page: 100})
       .then(repos => {
-        console.log(repos.length);
-        // console.log(JSON.stringify(repos[0], null, 2));
+        console.log(`Processing ${repos.length} repositories`);
         return repos.map(repo => { return {
           name: repo.name,
           owner: org, //TODO verify this in not in the payload

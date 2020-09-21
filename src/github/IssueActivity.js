@@ -41,7 +41,6 @@ module.exports = class IssueActivity {
       return data;
     }).catch(err => {
       if (err.status === 404) {
-        console.error(`404 error trapped! ${JSON.stringify(err)}`);
         return {};
       } else {
         console.error(err)

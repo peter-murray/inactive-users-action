@@ -17,7 +17,7 @@ module.exports.create = (token, maxRetries) => {
       onRateLimit: (retryAfter, options) => {
         octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
         if (options.request.retryCount < MAX_RETRIES) {
-          Octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
           return true;
         }
       },
