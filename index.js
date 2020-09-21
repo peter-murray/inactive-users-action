@@ -6,7 +6,7 @@ const fs = require('fs')
   , io = require('@actions/io')
   , json2csv = require('json2csv')
   , OrganizationActivity = require('./src/OrganizationUserActivity')
-  , GitHubClient = require('./src/github/GitHubClient')
+  , githubClient = require('./src/github/githubClient')
   , dateUtil = require('./src/dateUtil')
 ;
 
@@ -29,7 +29,7 @@ async function run() {
   // Ensure that the output directory exists before we our limited API usage
   await io.mkdirP(outputDir)
 
-  const octokit = new GitHubClient(token)
+  const octokit = githubClient.create(token)
     , orgActivity = new OrganizationActivity(octokit)
   ;
 

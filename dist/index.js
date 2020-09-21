@@ -461,7 +461,7 @@ const fs = __webpack_require__(747)
   , io = __webpack_require__(1)
   , json2csv = __webpack_require__(577)
   , OrganizationActivity = __webpack_require__(231)
-  , GitHubClient = __webpack_require__(500)
+  , githubClient = __webpack_require__(858)
   , dateUtil = __webpack_require__(436)
 ;
 
@@ -484,7 +484,7 @@ async function run() {
   // Ensure that the output directory exists before we our limited API usage
   await io.mkdirP(outputDir)
 
-  const octokit = new GitHubClient(token)
+  const octokit = githubClient.create(token)
     , orgActivity = new OrganizationActivity(octokit)
   ;
 
@@ -4747,48 +4747,6 @@ module.exports = Parser;
 
 /***/ }),
 
-/***/ 500:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const {throttling} = __webpack_require__(617)
-  , {retry} = __webpack_require__(755)
-  , {Octokit} = __webpack_require__(889)
-;
-
-const RetryThrottlingOctokit = Octokit.plugin(throttling, retry);
-
-//TODO could apply the API endpoint (i.e. support GHES)
-
-module.exports = (token, maxRetries) => {
-  const MAX_RETRIES = maxRetries ? maxRetries : 3
-
-  return new RetryThrottlingOctokit({
-    auth: `token ${token}`,
-
-    throttle: {
-      onRateLimit: (retryAfter, options) => {
-        octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-        if (options.request.retryCount < MAX_RETRIES) {
-          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
-          return true;
-        }
-      },
-
-      onAbuseLimit: (retryAfter, options) => {
-        octokit.log.warn(`Abuse detection triggered request ${options.method} ${options.url}`);
-        if (options.request.retryCount < MAX_RETRIES) {
-          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
-          return true;
-        }
-      }
-    }
-  });
-}
-
-
-
-/***/ }),
-
 /***/ 510:
 /***/ (function(module) {
 
@@ -8319,6 +8277,48 @@ function get(object, path, defaultValue) {
 }
 
 module.exports = get;
+
+
+/***/ }),
+
+/***/ 858:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const {throttling} = __webpack_require__(617)
+  , {retry} = __webpack_require__(755)
+  , {Octokit} = __webpack_require__(889)
+;
+
+const RetryThrottlingOctokit = Octokit.plugin(throttling, retry);
+
+//TODO could apply the API endpoint (i.e. support GHES)
+
+module.exports.create = (token, maxRetries) => {
+  const MAX_RETRIES = maxRetries ? maxRetries : 3
+
+  return new RetryThrottlingOctokit({
+    auth: `token ${token}`,
+
+    throttle: {
+      onRateLimit: (retryAfter, options) => {
+        octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+        if (options.request.retryCount < MAX_RETRIES) {
+          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          return true;
+        }
+      },
+
+      onAbuseLimit: (retryAfter, options) => {
+        octokit.log.warn(`Abuse detection triggered request ${options.method} ${options.url}`);
+        if (options.request.retryCount < MAX_RETRIES) {
+          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          return true;
+        }
+      }
+    }
+  });
+}
+
 
 
 /***/ }),

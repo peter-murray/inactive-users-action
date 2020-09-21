@@ -7,7 +7,7 @@ const RetryThrottlingOctokit = Octokit.plugin(throttling, retry);
 
 //TODO could apply the API endpoint (i.e. support GHES)
 
-module.exports = (token, maxRetries) => {
+module.exports.create = (token, maxRetries) => {
   const MAX_RETRIES = maxRetries ? maxRetries : 3
 
   return new RetryThrottlingOctokit({
