@@ -637,57 +637,38 @@ module.exports = class OrganizationUserActivity {
     return this._repositoryActivity;
   }
 
-  getUserActivity(org, since) {
+  async getUserActivity(org, since) {
     const self = this;
 
-    return self.organizationClient.getRepositories(org)
-      .then(repositories => {
-        const promises = [];
+    const repositories = await self.organizationClient.getRepositories(org)
+      , orgUsers = await self.organizationClient.findUsers(org)
+    ;
 
-        repositories.forEach(repo => {
-          promises.push(self.repositoryClient.getActivity(repo, since));
-        });
+    const activityResults = {};
+    for(let idx = 0; idx< repositories.length; idx++) {
+      const repoActivity = await self.repositoryClient.getActivity(repositories[idx], since);
+      Object.assign(activityResults, repoActivity);
+    }
 
-        return serializePromises(promises);
-        // return Promise.all(promises)
-      })
-      .then(res => {
-        // Unpack the resolved promises into an object mapping repos to activity
-        const result = {};
-        if (res) {
-          res.forEach(repoActivity => {
-            Object.assign(result, repoActivity);
-          });
+    const userActivity = generateUserActivityData(activityResults);
+
+    orgUsers.forEach(user => {
+      if (userActivity[user.login]) {
+        if (user.email && user.email.length > 0) {
+          userActivity[user.login] = user.email;
         }
-        return result;
-      })
-      .then(repoActivity => {
-        const userActivity = generateUserActivityData(repoActivity);
+      } else {
+        const userData = new UserActivity(user.login);
+        userData.email = user.email;
 
-        // Process the users in the organization filling in any blanks from lack of activity and providing emails if present
-        return self.organizationClient.findUsers(org)
-          .then(orgUsers => {
-            // ensure we have a user entry for each organization user
-            orgUsers.forEach(user => {
-              if (userActivity[user.login]) {
-                if (user.email && user.email.length > 0) {
-                  userActivity[user.login] = user.email;
-                }
-              } else {
-                const userData = new UserActivity(user.login);
-                userData.email = user.email;
+        userActivity[user.login] = userData
+      }
+    });
 
-                userActivity[user.login] = userData
-              }
-            });
-
-            // An array of user activity objects
-            return Object.values(userActivity);
-          });
-      });
+    // An array of user activity objects
+    return Object.values(userActivity);
   }
 }
-
 
 function generateUserActivityData(data) {
   if (!data) {
@@ -717,18 +698,6 @@ function generateUserActivityData(data) {
   });
 
   return results;
-}
-
-
-function serializePromises(promises) {
-
-  return promises.reduce((promiseChain, promiseFn) => {
-    return promiseChain.then(chainResults =>
-      promiseFn.then(currentResult =>
-        [ ...chainResults, currentResult ]
-      )
-    );
-  }, Promise.resolve([]))
 }
 
 /***/ }),
@@ -1366,7 +1335,7 @@ module.exports = class RepositoryActivity {
     this._pullRequestActivity = new PullRequestActivity(octokit)
   }
 
-  getActivity(repo, since) {
+  async getActivity(repo, since) {
     const owner = repo.owner
       , name = repo.name
       , fullName = repo.full_name
@@ -1378,26 +1347,44 @@ module.exports = class RepositoryActivity {
 
     //TODO need some validation around the parameters
 
-    return commitActivity.getCommitActivityFrom(owner, name, since)
-      .then(commits => {
-        data[UserActivityAttributes.COMMITS] = commits[fullName];
-        return issueActivity.getIssueActivityFrom(owner, name, since);
-      })
-      .then(issues => {
-        data[UserActivityAttributes.ISSUES] = issues[fullName];
-        return issueActivity.getIssueCommentActivityFrom(owner, name, since);
-      })
-      .then(issueComments => {
-        data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
-        return prActivity.getPullRequestCommentActivityFrom(owner, name, since);
-      })
-      .then(prComments => {
-        data[UserActivityAttributes.PULL_REQUEST_COMMENTS]= prComments[fullName];
+    const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
+    data[UserActivityAttributes.COMMITS] = commits[fullName];
 
-        const results = {}
-        results[fullName] = data;
-        return results;
-      });
+    const issues = await issueActivity.getIssueActivityFrom(owner, name, since)
+    data[UserActivityAttributes.ISSUES] = issues[fullName];
+
+    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
+
+    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since)
+    data[UserActivityAttributes.PULL_REQUEST_COMMENTS] = prComments[fullName];
+
+    const results = {};
+    results[fullName] = data;
+    return results;
+
+    // Need to avoid triggering the chain so using async now
+    //
+    // return commitActivity.getCommitActivityFrom(owner, name, since)
+    //   .then(commits => {
+    //     data[UserActivityAttributes.COMMITS] = commits[fullName];
+    //     return issueActivity.getIssueActivityFrom(owner, name, since);
+    //   })
+    //   .then(issues => {
+    //     data[UserActivityAttributes.ISSUES] = issues[fullName];
+    //     return issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    //   })
+    //   .then(issueComments => {
+    //     data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
+    //     return prActivity.getPullRequestCommentActivityFrom(owner, name, since);
+    //   })
+    //   .then(prComments => {
+    //     data[UserActivityAttributes.PULL_REQUEST_COMMENTS]= prComments[fullName];
+    //
+    //     const results = {}
+    //     results[fullName] = data;
+    //     return results;
+    //   });
   }
 }
 

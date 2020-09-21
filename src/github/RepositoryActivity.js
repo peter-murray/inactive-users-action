@@ -11,7 +11,7 @@ module.exports = class RepositoryActivity {
     this._pullRequestActivity = new PullRequestActivity(octokit)
   }
 
-  getActivity(repo, since) {
+  async getActivity(repo, since) {
     const owner = repo.owner
       , name = repo.name
       , fullName = repo.full_name
@@ -23,26 +23,44 @@ module.exports = class RepositoryActivity {
 
     //TODO need some validation around the parameters
 
-    return commitActivity.getCommitActivityFrom(owner, name, since)
-      .then(commits => {
-        data[UserActivityAttributes.COMMITS] = commits[fullName];
-        return issueActivity.getIssueActivityFrom(owner, name, since);
-      })
-      .then(issues => {
-        data[UserActivityAttributes.ISSUES] = issues[fullName];
-        return issueActivity.getIssueCommentActivityFrom(owner, name, since);
-      })
-      .then(issueComments => {
-        data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
-        return prActivity.getPullRequestCommentActivityFrom(owner, name, since);
-      })
-      .then(prComments => {
-        data[UserActivityAttributes.PULL_REQUEST_COMMENTS]= prComments[fullName];
+    const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
+    data[UserActivityAttributes.COMMITS] = commits[fullName];
 
-        const results = {}
-        results[fullName] = data;
-        return results;
-      });
+    const issues = await issueActivity.getIssueActivityFrom(owner, name, since)
+    data[UserActivityAttributes.ISSUES] = issues[fullName];
+
+    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
+
+    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since)
+    data[UserActivityAttributes.PULL_REQUEST_COMMENTS] = prComments[fullName];
+
+    const results = {};
+    results[fullName] = data;
+    return results;
+
+    // Need to avoid triggering the chain so using async now
+    //
+    // return commitActivity.getCommitActivityFrom(owner, name, since)
+    //   .then(commits => {
+    //     data[UserActivityAttributes.COMMITS] = commits[fullName];
+    //     return issueActivity.getIssueActivityFrom(owner, name, since);
+    //   })
+    //   .then(issues => {
+    //     data[UserActivityAttributes.ISSUES] = issues[fullName];
+    //     return issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    //   })
+    //   .then(issueComments => {
+    //     data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
+    //     return prActivity.getPullRequestCommentActivityFrom(owner, name, since);
+    //   })
+    //   .then(prComments => {
+    //     data[UserActivityAttributes.PULL_REQUEST_COMMENTS]= prComments[fullName];
+    //
+    //     const results = {}
+    //     results[fullName] = data;
+    //     return results;
+    //   });
   }
 }
 
