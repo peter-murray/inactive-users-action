@@ -21,7 +21,14 @@ jobs:
           organization: octodemo
           activity_days: 7
           
-      - name: Validate Outputs
-        run: |
-          echo "Outputs - csv ${{ steps.analyze_org.outputs.report_csv }}"
+#       - name: Validate Outputs
+#         run: |
+#           echo "Outputs - csv ${{ steps.analyze_org.outputs.report_csv }}"
  
+      - name: Attach Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          path: |
+            ${{ steps.analyze_org.outputs.report_csv }}
+            ${{ steps.analyze_org.outputs.report_json }}
