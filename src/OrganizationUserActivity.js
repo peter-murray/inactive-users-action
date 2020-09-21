@@ -1,5 +1,5 @@
 const Organization = require('./github/Organization')
-  , RepositoryActivity = require('./src/github/RepositoryActivity')
+  , RepositoryActivity = require('./github/RepositoryActivity')
   , UserActivity = require('./UserActivity')
 ;
 

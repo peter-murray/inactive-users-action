@@ -450,14 +450,6 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 99:
-/***/ (function(module) {
-
-module.exports = eval("require")("./src/github/RepositoryActivity");
-
-
-/***/ }),
-
 /***/ 104:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
@@ -617,7 +609,7 @@ module.exports = require("https");
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const Organization = __webpack_require__(916)
-  , RepositoryActivity = __webpack_require__(99)
+  , RepositoryActivity = __webpack_require__(375)
   , UserActivity = __webpack_require__(664)
 ;
 
@@ -719,6 +711,78 @@ function generateUserActivityData(data) {
 
 /***/ }),
 
+/***/ 243:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const util = __webpack_require__(436);
+
+module.exports = class CommitActivity {
+
+  constructor(octokit) {
+    if (!octokit) {
+      throw new Error('An octokit client must be provided');
+    }
+    this._octokit = octokit;
+  }
+
+  getCommitActivityFrom(owner, repo, since) {
+    const from = util.getFromDate(since)
+      , repoFullName = `${owner}/${repo}`
+    ;
+
+    return this.octokit.paginate('GET /repos/:owner/:repo/commits',
+      {
+        owner: owner,
+        repo: repo,
+        since: from,
+        per_page: 100,
+      }
+    ).then(commits => {
+      const committers = {};
+
+      commits.forEach(commit => {
+        if (commit.author && commit.author.login) {
+          const login = commit.author.login;
+
+          if (!committers[login]) {
+            committers[login] = 1;
+          } else {
+            committers[login] = committers[login] + 1;
+          }
+        }
+      });
+
+      const result = {};
+      result[repoFullName] = committers;
+
+      return result;
+    })
+      .catch(err => {
+        if (err.status === 404) {
+          //TODO could log this out
+          return {};
+        } else if (err.status === 409) {
+          if (err.message.toLowerCase().startsWith('git repository is empty')) {
+            return {};
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      })
+  }
+
+  get octokit() {
+    return this._octokit;
+  }
+}
+
+
+
+
+/***/ }),
+
 /***/ 248:
 /***/ (function(module) {
 
@@ -760,6 +824,19 @@ function flatten({ objects = true, arrays = false, separator = '.' } = {}) {
 
 module.exports = flatten;
 
+
+/***/ }),
+
+/***/ 275:
+/***/ (function(module) {
+
+
+module.exports = {
+  COMMITS: 'commits',
+  ISSUES: 'issues',
+  ISSUE_COMMENTS: 'issueComments',
+  PULL_REQUEST_COMMENTS: 'prComments',
+}
 
 /***/ }),
 
@@ -933,6 +1010,109 @@ paginateRest.VERSION = VERSION;
 exports.paginateRest = paginateRest;
 //# sourceMappingURL=index.js.map
 
+
+/***/ }),
+
+/***/ 300:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const util = __webpack_require__(436);
+
+module.exports = class IssueActivity {
+
+  constructor(octokit) {
+    if (!octokit) {
+      throw new Error('An octokit client must be provided');
+    }
+    this._octokit = octokit;
+  }
+
+  getIssueActivityFrom(owner, repo, since) {
+    const from = util.getFromDate(since)
+      , repoFullName = `${owner}/${repo}`
+    ;
+
+    return this.octokit.paginate('GET /repos/:owner/:repo/issues',
+      {
+        owner: owner,
+        repo: repo,
+        since: from,
+        per_page: 100,
+      }
+    ).then(issues => {
+      const users = {};
+
+      issues.forEach(issue => {
+        if (issue.user && issue.user.login) {
+          const login = issue.user.login;
+
+          if (!users[login]) {
+            users[login] = 1;
+          } else {
+            users[login] = users[login] + 1;
+          }
+        }
+      });
+
+      const data = {}
+      data[repoFullName] = users;
+      return data;
+    }).catch(err => {
+      if (err.status === 404) {
+        console.error(`404 error trapped! ${JSON.stringify(err)}`);
+        return {};
+      } else {
+        console.error(err)
+        throw err;
+      }
+    });
+  }
+
+  getIssueCommentActivityFrom(owner, repo, since) {
+    const from = util.getFromDate(since)
+      , repoFullName = `${owner}/${repo}`
+    ;
+
+    return this.octokit.paginate('GET /repos/:owner/:repo/issues/comments',
+      {
+        owner: owner,
+        repo: repo,
+        since: from,
+        per_page: 100,
+      }
+    ).then(comments => {
+      const users = {};
+
+      comments.forEach(comment => {
+        if (comment.user && comment.user.login) {
+          const login = comment.user.login;
+
+          if (!users[login]) {
+            users[login] = 1;
+          } else {
+            users[login] = users[login] + 1;
+          }
+        }
+      });
+
+      const data = {}
+      data[repoFullName] = users;
+      return data;
+    }).catch(err => {
+      if (err.status === 404) {
+        //TODO could log this out
+        return {};
+      } else {
+        console.error(err)
+        throw err;
+      }
+    })
+  }
+
+  get octokit() {
+    return this._octokit;
+  }
+}
 
 /***/ }),
 
@@ -1146,6 +1326,62 @@ exports.isPlainObject = isPlainObject;
 /***/ (function(module) {
 
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 375:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const CommitActivity = __webpack_require__(243)
+  , IssueActivity = __webpack_require__(300)
+  , PullRequestActivity = __webpack_require__(460)
+  , UserActivityAttributes = __webpack_require__(275)
+
+module.exports = class RepositoryActivity {
+
+  constructor(octokit) {
+    this._commitActivity = new CommitActivity(octokit)
+    this._issueActivity = new IssueActivity(octokit)
+    this._pullRequestActivity = new PullRequestActivity(octokit)
+  }
+
+  getActivity(repo, since) {
+    const owner = repo.owner
+      , name = repo.name
+      , fullName = repo.full_name
+      , commitActivity = this._commitActivity
+      , issueActivity = this._issueActivity
+      , prActivity = this._pullRequestActivity
+      , data = {}
+    ;
+
+    //TODO need some validation around the parameters
+
+    return commitActivity.getCommitActivityFrom(owner, name, since)
+      .then(commits => {
+        data[UserActivityAttributes.COMMITS] = commits[fullName];
+        return issueActivity.getIssueActivityFrom(owner, name, since);
+      })
+      .then(issues => {
+        data[UserActivityAttributes.ISSUES] = issues[fullName];
+        return issueActivity.getIssueCommentActivityFrom(owner, name, since);
+      })
+      .then(issueComments => {
+        data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
+        return prActivity.getPullRequestCommentActivityFrom(owner, name, since);
+      })
+      .then(prComments => {
+        data[UserActivityAttributes.PULL_REQUEST_COMMENTS]= prComments[fullName];
+
+        const results = {}
+        results[fullName] = data;
+        return results;
+      });
+  }
+}
+
+
+
 
 /***/ }),
 
@@ -3728,6 +3964,73 @@ exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
 exports.FetchError = FetchError;
+
+
+/***/ }),
+
+/***/ 460:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const util = __webpack_require__(436);
+
+module.exports = class PullRequestActivity {
+
+  constructor(octokit) {
+    if (!octokit) {
+      throw new Error('An octokit client must be provided');
+    }
+    this._octokit = octokit;
+  }
+
+  getPullRequestCommentActivityFrom(owner, repo, since) {
+    const from = util.getFromDate(since)
+      , repoFullName = `${owner}/${repo}`
+    ;
+
+    return this.octokit.paginate('GET /repos/:owner/:repo/pulls/comments',
+      {
+        owner: owner,
+        repo: repo,
+        since: from,
+        per_page: 100,
+      }
+    ).then(prComments => {
+      const users = {};
+
+      prComments.forEach(prComment => {
+        if (prComment.user && prComment.user.login) {
+          const login = prComment.user.login;
+
+          if (!users[login]) {
+            users[login] = 1;
+          } else {
+            users[login] = users[login] + 1;
+          }
+        }
+      });
+
+      const result = {};
+      result[repoFullName] = users;
+
+      return result;
+    })
+      .catch(err => {
+        if (err.status === 404) {
+          //TODO could log this out
+          return {};
+        } else {
+          console.error(err)
+          throw err;
+        }
+      })
+  }
+
+  get octokit() {
+    return this._octokit;
+  }
+}
+
+
 
 
 /***/ }),
