@@ -19,7 +19,7 @@ jobs:
         with:
           token: ${{ secrets.OCTODEMO_TOKEN }}
           organization: octodemo
-          activity_days: 7
+#           activity_days: 7
           
 #       - name: Validate Outputs
 #         run: |
