@@ -35,7 +35,7 @@ async function run() {
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
   const userActivity = await orgActivity.getUserActivity(organization, fromDate);
-  saveIntermediateData(outputDir, userActivity);
+  saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
   // Convert the JavaScript objects into a JSON payload so it can be output
   console.log(`User activity data captured, generating report...`);
