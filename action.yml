@@ -22,7 +22,13 @@ inputs:
 
   activity_days:
     description: The number of days in the past to check for activity, this will be ignored if 'since' parameter is used.
+    required: true
     default: 30
+
+  octokit_max_retries:
+    description: Maximum number of retires when using the Octokit REST API
+    required: true
+    default: 3
 
 runs:
   using: node12

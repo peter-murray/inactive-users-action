@@ -16,8 +16,10 @@ module.exports.create = (token, maxRetries) => {
     throttle: {
       onRateLimit: (retryAfter, options) => {
         octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+        octokit.log.warn(`  request retries: ${options.request.retryCount}, MAX: ${MAX_RETRIES}`);
+
         if (options.request.retryCount < MAX_RETRIES) {
-          octokit.log.warn(`Retrying after ${retryAfter} seconds`);
+          octokit.log.warn(`Retrying after ${retryAfter} seconds.`);
           return true;
         }
       },

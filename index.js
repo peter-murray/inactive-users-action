@@ -16,6 +16,7 @@ async function run() {
     , token = getRequiredInput('token')
     , outputDir = getRequiredInput('outputDir')
     , organization = getRequiredInput('organization')
+    , maxRetries = getRequiredInput('octokit_max_retries')
   ;
 
   let fromDate;
@@ -29,7 +30,7 @@ async function run() {
   // Ensure that the output directory exists before we our limited API usage
   await io.mkdirP(outputDir)
 
-  const octokit = githubClient.create(token)
+  const octokit = githubClient.create(token, maxRetries)
     , orgActivity = new OrganizationActivity(octokit)
   ;
 
