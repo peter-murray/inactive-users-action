@@ -1,0 +1,35 @@
+name: Long Timeframe Test
+
+on:
+  workflow_dispatch:    
+
+jobs:
+  analyze:
+    name: Analyze Organization Activity
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Action
+        uses: actions/checkout@v2
+        
+      - name: Analyze organization
+        id: analyze_org
+        uses: ./
+        with:
+          token: ${{ secrets.OCTODEMO_TOKEN }}
+          organization: octodemo
+          activity_days: 90
+          octokit_max_retries: 100
+          
+#       - name: Validate Outputs
+#         run: |
+#           echo "Outputs - csv ${{ steps.analyze_org.outputs.report_csv }}"
+ 
+      - name: Attach Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: reports
+          path: |
+            ${{ steps.analyze_org.outputs.report_csv }}
+            ${{ steps.analyze_org.outputs.report_json }}
