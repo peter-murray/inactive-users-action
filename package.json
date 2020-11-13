@@ -24,7 +24,7 @@
         "json2csv": "^5.0.4"
     },
     "devDependencies": {
-        "@vercel/ncc": "^0.25.1",
+        "@vercel/ncc": "^0.23.0",
         "chai": "^4.2.0",
         "mocha": "^8.2.1"
     }
