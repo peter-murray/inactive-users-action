@@ -19,6 +19,7 @@ As a guide, in testing this action takes about 15 minutes to run on an organizat
 * `since`: A date to be used to collect information from in the form YYYY-MM-DD, if this is specified, `activity_days` is ignored
 * `activity_days`: The number of days back from now to collect information from, defaults to `30` days
 * `outputDir`: The output directory to store the report files in.
+* `octokit_max_retries`: The number of retries before failing with the octokit REST API calls, defaults to `15`.
 
 ## Outputs
 

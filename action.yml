@@ -28,7 +28,7 @@ inputs:
   octokit_max_retries:
     description: Maximum number of retires when using the Octokit REST API
     required: true
-    default: 3
+    default: 15
 
 runs:
   using: node12
