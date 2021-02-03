@@ -42,7 +42,7 @@ async function run() {
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
-  const orgs = organization.trim().split(",")
+  const orgs = organization.split(",")
   console.log(`orgs array:` + orgs);
   for (const org in orgs) {
     console.log(`Generating report for following org:` + org);
