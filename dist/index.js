@@ -43,7 +43,6 @@ async function run() {
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
   const orgs = organization.trim().split(",")
-  console.log(`orgs array:` + orgs);
   for (const org of orgs) {
     console.log(`Generating report for following org:` + org);
     const userActivity = await orgActivity.getUserActivity(org, fromDate);
@@ -55,12 +54,12 @@ async function run() {
       , csv = json2csv.parse(data, {})
     ;
 
-    const file = path.join(outputDir, 'user_activity_${org}.csv');
+    const file = path.join(outputDir, `user_activity_${org}.csv`);
     fs.writeFileSync(file, csv);
     console.log(`User Activity Report Generated: ${file}`);
 
     // Expose the output csv file
-    core.setOutput('report_csv_${org}', file);
+    core.setOutput(`report_csv_${org}`, file);
   }
 }
 
