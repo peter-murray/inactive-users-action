@@ -42,21 +42,24 @@ async function run() {
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
-  const userActivity = await orgActivity.getUserActivity(organization, fromDate);
-  saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
+  const orgs = organization.trim().split(",")
+  for (const org in orgs) {
+    const userActivity = await orgActivity.getUserActivity(org, fromDate);
+    saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
-  // Convert the JavaScript objects into a JSON payload so it can be output
-  console.log(`User activity data captured, generating report...`);
-  const data = userActivity.map(activity => activity.jsonPayload)
-    , csv = json2csv.parse(data, {})
-  ;
+    // Convert the JavaScript objects into a JSON payload so it can be output
+    console.log(`User activity data captured, generating report...`);
+    const data = userActivity.map(activity => activity.jsonPayload)
+      , csv = json2csv.parse(data, {})
+    ;
 
-  const file = path.join(outputDir, 'organization_user_activity.csv');
-  fs.writeFileSync(file, csv);
-  console.log(`User Activity Report Generated: ${file}`);
+    const file = path.join(outputDir, '${org}_user_activity.csv');
+    fs.writeFileSync(file, csv);
+    console.log(`User Activity Report Generated: ${file}`);
 
-  // Expose the output csv file
-  core.setOutput('report_csv', file);
+    // Expose the output csv file
+    core.setOutput('report_csv_${org}', file);
+  }
 }
 
 async function execute() {
