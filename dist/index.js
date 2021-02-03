@@ -42,7 +42,7 @@ async function run() {
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
-  const orgs = organization.trim().split(",")
+  const orgs = organization.split(",")
   for (const org of orgs) {
     console.log(`Generating report for the following org: ` + org);
     const userActivity = await orgActivity.getUserActivity(org, fromDate);
