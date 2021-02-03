@@ -53,7 +53,7 @@ async function run() {
       , csv = json2csv.parse(data, {})
     ;
 
-    const file = path.join(outputDir, '${org}_user_activity.csv');
+    const file = path.join(outputDir, 'user_activity_${org}.csv');
     fs.writeFileSync(file, csv);
     console.log(`User Activity Report Generated: ${file}`);
 
