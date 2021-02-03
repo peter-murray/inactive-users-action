@@ -45,7 +45,7 @@ async function run() {
   const orgs = organization.trim().split(",")
   for (const org of orgs) {
     console.log(`Generating report for the ${org} organization`);
-    const userActivity = await orgActivity.getUserActivity(`${org}`, fromDate);
+    const userActivity = await orgActivity.getUserActivity(org, fromDate);
     saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
     // Convert the JavaScript objects into a JSON payload so it can be output
