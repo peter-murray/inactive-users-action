@@ -43,7 +43,9 @@ async function run() {
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
   const orgs = organization.trim().split(",")
+  console.log(`orgs array:` + orgs);
   for (const org in orgs) {
+    console.log(`Generating report for following org:` + org);
     const userActivity = await orgActivity.getUserActivity(org, fromDate);
     saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
