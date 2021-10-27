@@ -1,7 +1,19 @@
 name: Simple Test
 
 on:
-  workflow_dispatch:    
+  workflow_dispatch:
+    inputs:
+      action_branch:
+        description: The branch of the action to use
+        default: main
+        
+      organiztion:
+        description: The organization to process
+        default: octodemo
+        
+      activity_days:
+        description: The number of days to use to analyze activity
+        default: '7'
 
 jobs:
   analyze:
@@ -12,14 +24,16 @@ jobs:
     steps:
       - name: Checkout Action
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.action_branch }}
         
       - name: Analyze organization
         id: analyze_org
         uses: ./
         with:
           token: ${{ secrets.OCTODEMO_TOKEN }}
-          organization: octodemo
-#           activity_days: 7
+          organization: ${{ github.event.inputs.organization }}
+          activity_days: ${{ github.event.inputs.activity_days }}
           
 #       - name: Validate Outputs
 #         run: |
