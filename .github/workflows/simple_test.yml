@@ -7,7 +7,7 @@ on:
         description: The branch of the action to use
         default: main
         
-      organiztion:
+      organization:
         description: The organization to process
         default: octodemo
         
