@@ -38,7 +38,7 @@ async function run() {
   await io.mkdirP(outputDir)
 
   const octokit = githubClient.create(token, maxRetries)
-    , orgActivity = new OrganizationActivity(octokit)
+    , orgActivity = new OrganizationActivity(octokit, core)
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
@@ -9413,9 +9413,11 @@ const Organization = __webpack_require__(2987)
 
 module.exports = class OrganizationUserActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
+    this._core = core;
+
     this._organization = new Organization(octokit);
-    this._repositoryActivity = new RepositoryActivity(octokit);
+    this._repositoryActivity = new RepositoryActivity(octokit, core);
   }
 
   get organizationClient() {
@@ -9643,11 +9645,12 @@ const util = __webpack_require__(8087);
 
 module.exports = class CommitActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getCommitActivityFrom(owner, repo, since) {
@@ -9679,12 +9682,12 @@ module.exports = class CommitActivity {
 
       const result = {};
       result[repoFullName] = committers;
-
+      this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
       return result;
     })
       .catch(err => {
         if (err.status === 404) {
-          //TODO could log this out
+          this.core.warning(`    failed to load commit activity for ${owner}/${repo}`);
           return {};
         } else if (err.status === 409) {
           if (err.message.toLowerCase().startsWith('git repository is empty')) {
@@ -9701,6 +9704,10 @@ module.exports = class CommitActivity {
   get octokit() {
     return this._octokit;
   }
+
+  get core() {
+    return this._core;
+  }
 }
 
 
@@ -9715,11 +9722,12 @@ const util = __webpack_require__(8087);
 
 module.exports = class IssueActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getIssueActivityFrom(owner, repo, since) {
@@ -9791,10 +9799,11 @@ module.exports = class IssueActivity {
 
       const data = {}
       data[repoFullName] = users;
+      this.core.info(`    identified issue comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
       return data;
     }).catch(err => {
       if (err.status === 404) {
-        //TODO could log this out
+        this.core.warning(`    failed to load issue comment activity for ${owner}/${repo}`);
         return {};
       } else {
         console.error(err)
@@ -9805,6 +9814,10 @@ module.exports = class IssueActivity {
 
   get octokit() {
     return this._octokit;
+  }
+
+  get core() {
+    return this._core;
   }
 }
 
@@ -9863,11 +9876,12 @@ const util = __webpack_require__(8087);
 
 module.exports = class PullRequestActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getPullRequestCommentActivityFrom(owner, repo, since) {
@@ -9900,11 +9914,12 @@ module.exports = class PullRequestActivity {
       const result = {};
       result[repoFullName] = users;
 
+      this.core.info(`    identified pull request comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
       return result;
     })
       .catch(err => {
         if (err.status === 404) {
-          //TODO could log this out
+          this.core.warning(`    failed to load pull request activity for ${owner}/${repo}`);
           return {};
         } else {
           console.error(err)
@@ -9915,6 +9930,10 @@ module.exports = class PullRequestActivity {
 
   get octokit() {
     return this._octokit;
+  }
+
+  get core() {
+    return this._core;
   }
 }
 
@@ -9933,10 +9952,12 @@ const CommitActivity = __webpack_require__(5448)
 
 module.exports = class RepositoryActivity {
 
-  constructor(octokit) {
-    this._commitActivity = new CommitActivity(octokit)
-    this._issueActivity = new IssueActivity(octokit)
-    this._pullRequestActivity = new PullRequestActivity(octokit)
+  constructor(octokit, core) {
+    this._core = core;
+
+    this._commitActivity = new CommitActivity(octokit, core)
+    this._issueActivity = new IssueActivity(octokit, core)
+    this._pullRequestActivity = new PullRequestActivity(octokit, core)
   }
 
   async getActivity(repo, since) {

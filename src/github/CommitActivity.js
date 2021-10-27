@@ -2,11 +2,12 @@ const util = require('../dateUtil');
 
 module.exports = class CommitActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getCommitActivityFrom(owner, repo, since) {
@@ -38,12 +39,12 @@ module.exports = class CommitActivity {
 
       const result = {};
       result[repoFullName] = committers;
-
+      this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
       return result;
     })
       .catch(err => {
         if (err.status === 404) {
-          //TODO could log this out
+          this.core.warning(`    failed to load commit activity for ${owner}/${repo}`);
           return {};
         } else if (err.status === 409) {
           if (err.message.toLowerCase().startsWith('git repository is empty')) {
@@ -59,6 +60,10 @@ module.exports = class CommitActivity {
 
   get octokit() {
     return this._octokit;
+  }
+
+  get core() {
+    return this._core;
   }
 }
 

@@ -2,11 +2,12 @@ const util = require('../dateUtil');
 
 module.exports = class IssueActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getIssueActivityFrom(owner, repo, since) {
@@ -78,10 +79,11 @@ module.exports = class IssueActivity {
 
       const data = {}
       data[repoFullName] = users;
+      this.core.info(`    identified issue comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
       return data;
     }).catch(err => {
       if (err.status === 404) {
-        //TODO could log this out
+        this.core.warning(`    failed to load issue comment activity for ${owner}/${repo}`);
         return {};
       } else {
         console.error(err)
@@ -92,5 +94,9 @@ module.exports = class IssueActivity {
 
   get octokit() {
     return this._octokit;
+  }
+
+  get core() {
+    return this._core;
   }
 }

@@ -2,11 +2,12 @@ const util = require('../dateUtil');
 
 module.exports = class PullRequestActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
     if (!octokit) {
       throw new Error('An octokit client must be provided');
     }
     this._octokit = octokit;
+    this._core = core;
   }
 
   getPullRequestCommentActivityFrom(owner, repo, since) {
@@ -39,11 +40,12 @@ module.exports = class PullRequestActivity {
       const result = {};
       result[repoFullName] = users;
 
+      this.core.info(`    identified pull request comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
       return result;
     })
       .catch(err => {
         if (err.status === 404) {
-          //TODO could log this out
+          this.core.warning(`    failed to load pull request activity for ${owner}/${repo}`);
           return {};
         } else {
           console.error(err)
@@ -54,6 +56,10 @@ module.exports = class PullRequestActivity {
 
   get octokit() {
     return this._octokit;
+  }
+
+  get core() {
+    return this._core;
   }
 }
 

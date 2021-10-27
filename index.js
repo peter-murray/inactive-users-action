@@ -31,7 +31,7 @@ async function run() {
   await io.mkdirP(outputDir)
 
   const octokit = githubClient.create(token, maxRetries)
-    , orgActivity = new OrganizationActivity(octokit)
+    , orgActivity = new OrganizationActivity(octokit, core)
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);

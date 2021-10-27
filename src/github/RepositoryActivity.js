@@ -5,10 +5,12 @@ const CommitActivity = require('./CommitActivity')
 
 module.exports = class RepositoryActivity {
 
-  constructor(octokit) {
-    this._commitActivity = new CommitActivity(octokit)
-    this._issueActivity = new IssueActivity(octokit)
-    this._pullRequestActivity = new PullRequestActivity(octokit)
+  constructor(octokit, core) {
+    this._core = core;
+
+    this._commitActivity = new CommitActivity(octokit, core)
+    this._issueActivity = new IssueActivity(octokit, core)
+    this._pullRequestActivity = new PullRequestActivity(octokit, core)
   }
 
   async getActivity(repo, since) {

@@ -6,9 +6,11 @@ const Organization = require('./github/Organization')
 
 module.exports = class OrganizationUserActivity {
 
-  constructor(octokit) {
+  constructor(octokit, core) {
+    this._core = core;
+
     this._organization = new Organization(octokit);
-    this._repositoryActivity = new RepositoryActivity(octokit);
+    this._repositoryActivity = new RepositoryActivity(octokit, core);
   }
 
   get organizationClient() {
