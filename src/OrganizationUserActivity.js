@@ -21,7 +21,7 @@ module.exports = class OrganizationUserActivity {
     return this._repositoryActivity;
   }
 
-  async getUserActivity(org, since) {
+  async getUserActivity(org, since, debug) {
     const self = this;
 
     const repositories = await self.organizationClient.getRepositories(org)
@@ -34,12 +34,24 @@ module.exports = class OrganizationUserActivity {
       Object.assign(activityResults, repoActivity);
     }
 
+    if (debug) {
+      core.startGroup('Organization Repository Activity Data');
+      core.info(JSON.stringify(activityResults, null, 2));
+      core.endGroup();
+    }
+
     const userActivity = generateUserActivityData(activityResults);
+
+    if (debug) {
+      core.startGroup('User Activity Map');
+      core.info(JSON.stringify(userActivity, null, 2));
+      core.endGroup();
+    }
 
     orgUsers.forEach(user => {
       if (userActivity[user.login]) {
         if (user.email && user.email.length > 0) {
-          userActivity[user.login] = user.email;
+          userActivity[user.login].email = user.email;
         }
       } else {
         const userData = new UserActivity(user.login);

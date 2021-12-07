@@ -30,6 +30,11 @@ inputs:
     required: true
     default: 15
 
+  debug:
+    description: Debug flag for revealing the intermediate data extracted from the API calls in the logs
+    required: false
+    default: false
+
 runs:
   using: node12
   main: dist/index.js

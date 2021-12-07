@@ -17,6 +17,7 @@ async function run() {
     , outputDir = getRequiredInput('outputDir')
     , organization = getRequiredInput('organization')
     , maxRetries = getRequiredInput('octokit_max_retries')
+    , debug = core.getInput('debug') === 'true'
   ;
 
   let fromDate;
@@ -35,7 +36,7 @@ async function run() {
   ;
 
   console.log(`Attempting to generate organization user activity data, this could take some time...`);
-  const userActivity = await orgActivity.getUserActivity(organization, fromDate);
+  const userActivity = await orgActivity.getUserActivity(organization, fromDate, debug);
   saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
   // Convert the JavaScript objects into a JSON payload so it can be output
