@@ -14,6 +14,10 @@ on:
       activity_days:
         description: The number of days to use to analyze activity
         default: '7'
+        
+      debug:
+        description: Debug output
+        default: 'false'
 
 jobs:
   analyze:
@@ -34,6 +38,7 @@ jobs:
           token: ${{ secrets.OCTODEMO_TOKEN }}
           organization: ${{ github.event.inputs.organization }}
           activity_days: ${{ github.event.inputs.activity_days }}
+          debug: ${{ github.event.inputs.debug }}
           
 #       - name: Validate Outputs
 #         run: |
