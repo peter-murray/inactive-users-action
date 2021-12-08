@@ -12762,7 +12762,9 @@ module.exports = class OrganizationUserActivity {
   }
 
   async getUserActivity(org, since, debug) {
-    const self = this;
+    const self = this
+      , core = this._core
+      ;
 
     const repositories = await self.organizationClient.getRepositories(org)
       , orgUsers = await self.organizationClient.findUsers(org)
