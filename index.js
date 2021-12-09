@@ -1,10 +1,9 @@
-// const github = require('@actions/github')
-//   , core = require('@actions/core')
 const fs = require('fs')
   , path = require('path')
   , core = require('@actions/core')
   , io = require('@actions/io')
   , json2csv = require('json2csv')
+  , fsUtil = require('./src/fsUtil')
   , OrganizationActivity = require('./src/OrganizationUserActivity')
   , githubClient = require('./src/github/githubClient')
   , dateUtil = require('./src/dateUtil')
@@ -22,7 +21,7 @@ async function run() {
 
   let fromDate;
   if (since) {
-    console.log(`Since Date has been specified, using that instead of active_days`)
+    core.info(`Since Date has been specified, using that instead of active_days`)
     fromDate = dateUtil.getFromDate(since);
   } else {
     fromDate = dateUtil.convertDaysToDate(days);
@@ -35,7 +34,7 @@ async function run() {
     , orgActivity = new OrganizationActivity(octokit, core)
   ;
 
-  console.log(`Attempting to generate organization user activity data, this could take some time...`);
+  core.info(`Attempting to generate organization user activity data, this could take some time...`);
   const userActivity = await orgActivity.getUserActivity(organization, fromDate, debug);
   saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
@@ -45,12 +44,7 @@ async function run() {
     , csv = json2csv.parse(data, {})
   ;
 
-  const file = path.join(outputDir, 'organization_user_activity.csv');
-  fs.writeFileSync(file, csv);
-  console.log(`User Activity Report Generated: ${file}`);
-
-  // Expose the output csv file
-  core.setOutput('report_csv', file);
+  fsUtil.saveOutputFile(outputDir, 'organization_user_activity.csv', csv, 'report_csv');
 }
 
 async function execute() {
@@ -68,11 +62,5 @@ function getRequiredInput(name) {
 }
 
 function saveIntermediateData(directory, data) {
-  try {
-    const file = path.join(directory, 'organization_user_activity.json');
-    fs.writeFileSync(file, JSON.stringify(data));
-    core.setOutput('report_json', file);
-  } catch (err) {
-    console.error(`Failed to save intermediate data: ${err}`);
-  }
+  fsUtil.saveOutputFile(directory, 'organization_user_activity.json', JSON.stringify(data), 'report_json');
 }

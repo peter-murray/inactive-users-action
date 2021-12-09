@@ -12741,6 +12741,7 @@ function wrappy (fn, cb) {
 const Organization = __nccwpck_require__(2987)
   , RepositoryActivity = __nccwpck_require__(2490)
   , UserActivity = __nccwpck_require__(9245)
+  , fsUtil = __nccwpck_require__(929)
 ;
 
 
@@ -12779,6 +12780,14 @@ module.exports = class OrganizationUserActivity {
     if (debug) {
       core.startGroup('Organization Repository Activity Data');
       core.info(JSON.stringify(activityResults, null, 2));
+
+      fsUtil.saveOutputFile(
+        process.cwd, 
+        'organization_user_activity_from_api.json',
+        JSON.stringify(activityResults),
+        'data_organization_user_activity'
+      );
+
       core.endGroup();
     }
 
@@ -12981,6 +12990,24 @@ function clearTime(date) {
   date.setMinutes(0);
   date.setSeconds(0);
   date.setMilliseconds(0);
+}
+
+/***/ }),
+
+/***/ 929:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+
+module.exports.saveOutputFile = function(directory, filename, content, outputName) {
+    try {
+        const file = path.join(directory, filename);
+        fs.writeFileSync(file, content);
+        core.setOutput(outputName, file);
+        core.info(`File ${outputName} written to ${file}`);
+    } catch (err) {
+      core.warning(`Failed to save file; ${directory}/${filename}: ${err}`);
+    }
 }
 
 /***/ }),
@@ -13594,13 +13621,12 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-// const github = require('@actions/github')
-//   , core = require('@actions/core')
 const fs = __nccwpck_require__(7147)
   , path = __nccwpck_require__(1017)
   , core = __nccwpck_require__(2186)
   , io = __nccwpck_require__(7436)
   , json2csv = __nccwpck_require__(9392)
+  , fsUtil = __nccwpck_require__(929)
   , OrganizationActivity = __nccwpck_require__(6166)
   , githubClient = __nccwpck_require__(8724)
   , dateUtil = __nccwpck_require__(8087)
@@ -13618,7 +13644,7 @@ async function run() {
 
   let fromDate;
   if (since) {
-    console.log(`Since Date has been specified, using that instead of active_days`)
+    core.info(`Since Date has been specified, using that instead of active_days`)
     fromDate = dateUtil.getFromDate(since);
   } else {
     fromDate = dateUtil.convertDaysToDate(days);
@@ -13631,7 +13657,7 @@ async function run() {
     , orgActivity = new OrganizationActivity(octokit, core)
   ;
 
-  console.log(`Attempting to generate organization user activity data, this could take some time...`);
+  core.info(`Attempting to generate organization user activity data, this could take some time...`);
   const userActivity = await orgActivity.getUserActivity(organization, fromDate, debug);
   saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
@@ -13641,12 +13667,7 @@ async function run() {
     , csv = json2csv.parse(data, {})
   ;
 
-  const file = path.join(outputDir, 'organization_user_activity.csv');
-  fs.writeFileSync(file, csv);
-  console.log(`User Activity Report Generated: ${file}`);
-
-  // Expose the output csv file
-  core.setOutput('report_csv', file);
+  fsUtil.saveOutputFile(outputDir, 'organization_user_activity.csv', csv, 'report_csv');
 }
 
 async function execute() {
@@ -13664,13 +13685,7 @@ function getRequiredInput(name) {
 }
 
 function saveIntermediateData(directory, data) {
-  try {
-    const file = path.join(directory, 'organization_user_activity.json');
-    fs.writeFileSync(file, JSON.stringify(data));
-    core.setOutput('report_json', file);
-  } catch (err) {
-    console.error(`Failed to save intermediate data: ${err}`);
-  }
+  fsUtil.saveOutputFile(directory, 'organization_user_activity.json', JSON.stringify(data), 'report_json');
 }
 })();
 

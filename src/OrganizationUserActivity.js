@@ -1,6 +1,7 @@
 const Organization = require('./github/Organization')
   , RepositoryActivity = require('./github/RepositoryActivity')
   , UserActivity = require('./UserActivity')
+  , fsUtil = require('./fsUtil')
 ;
 
 
@@ -39,6 +40,14 @@ module.exports = class OrganizationUserActivity {
     if (debug) {
       core.startGroup('Organization Repository Activity Data');
       core.info(JSON.stringify(activityResults, null, 2));
+
+      fsUtil.saveOutputFile(
+        process.cwd, 
+        'organization_user_activity_from_api.json',
+        JSON.stringify(activityResults),
+        'data_organization_user_activity'
+      );
+
       core.endGroup();
     }
 
