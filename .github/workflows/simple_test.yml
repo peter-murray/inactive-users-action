@@ -47,3 +47,4 @@ jobs:
           path: |
             ${{ steps.analyze_org.outputs.report_csv }}
             ${{ steps.analyze_org.outputs.report_json }}
+            ${{ steps.analyze_org.outputs.data_organization_user_activity }}
