@@ -35,14 +35,10 @@ jobs:
         id: analyze_org
         uses: ./
         with:
-          token: ${{ secrets.OCTODEMO_TOKEN }}
+          token: ${{ secrets.OCTODEMO_TEMP_TOKEN }}
           organization: ${{ github.event.inputs.organization }}
           activity_days: ${{ github.event.inputs.activity_days }}
           debug: ${{ github.event.inputs.debug }}
-          
-#       - name: Validate Outputs
-#         run: |
-#           echo "Outputs - csv ${{ steps.analyze_org.outputs.report_csv }}"
  
       - name: Attach Artifacts
         uses: actions/upload-artifact@v2
