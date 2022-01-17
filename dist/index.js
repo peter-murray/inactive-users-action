@@ -13035,6 +13035,7 @@ module.exports = class CommitActivity {
   getCommitActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
+      , core = this.core
     ;
 
     return this.octokit.paginate('GET /repos/:owner/:repo/commits',
@@ -13064,9 +13065,9 @@ module.exports = class CommitActivity {
       this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
 
       if(debug) {
-        this.core.startGroup('debug committers object')
-        this.core.info(JSON.stringify(result, null, 2));
-        this.core.endGroup();
+        core.startGroup('debug committers object')
+        core.info(JSON.stringify(result, null, 2));
+        core.endGroup();
       }
 
       return result;
@@ -13119,6 +13120,7 @@ module.exports = class IssueActivity {
   getIssueActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
+      , core = this.core
     ;
 
     return this.octokit.paginate('GET /repos/:owner/:repo/issues',
@@ -13147,9 +13149,9 @@ module.exports = class IssueActivity {
       data[repoFullName] = users;
 
       if(debug) {
-        this.core.startGroup('debug issue activity object')
-        this.core.info(JSON.stringify(data, null, 2));
-        this.core.endGroup();
+        core.startGroup('debug issue activity object')
+        core.info(JSON.stringify(data, null, 2));
+        core.endGroup();
       }
 
       return data;
@@ -13166,6 +13168,7 @@ module.exports = class IssueActivity {
   getIssueCommentActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
+      , core = this.core
     ;
 
     return this.octokit.paginate('GET /repos/:owner/:repo/issues/comments',
@@ -13195,9 +13198,9 @@ module.exports = class IssueActivity {
       this.core.info(`    identified issue comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
 
       if(debug) {
-        this.core.startGroup('debug issue comments object')
-        this.core.info(JSON.stringify(data, null, 2));
-        this.core.endGroup();
+        core.startGroup('debug issue comments object')
+        core.info(JSON.stringify(data, null, 2));
+        core.endGroup();
       }
 
       return data;
@@ -13287,6 +13290,7 @@ module.exports = class PullRequestActivity {
   getPullRequestCommentActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
+      , core = this.core
     ;
 
     return this.octokit.paginate('GET /repos/:owner/:repo/pulls/comments',
@@ -13317,9 +13321,9 @@ module.exports = class PullRequestActivity {
       this.core.info(`    identified pull request comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
 
       if(debug) {
-        this.core.startGroup('debug pull request object')
-        this.core.info(JSON.stringify(result, null, 2));
-        this.core.endGroup();
+        core.startGroup('debug pull request object')
+        core.info(JSON.stringify(result, null, 2));
+        core.endGroup();
       }
       return result;
     })
@@ -13374,7 +13378,7 @@ module.exports = class RepositoryActivity {
       , issueActivity = this._issueActivity
       , prActivity = this._pullRequestActivity
       , data = {}
-      , core = this.core
+      , core = this._core
     ;
 
     //TODO need some validation around the parameters

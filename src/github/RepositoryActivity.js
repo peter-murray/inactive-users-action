@@ -21,7 +21,7 @@ module.exports = class RepositoryActivity {
       , issueActivity = this._issueActivity
       , prActivity = this._pullRequestActivity
       , data = {}
-      , core = this.core
+      , core = this._core
     ;
 
     //TODO need some validation around the parameters

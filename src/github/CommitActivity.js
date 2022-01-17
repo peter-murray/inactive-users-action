@@ -13,6 +13,7 @@ module.exports = class CommitActivity {
   getCommitActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
+      , core = this.core
     ;
 
     return this.octokit.paginate('GET /repos/:owner/:repo/commits',
@@ -42,9 +43,9 @@ module.exports = class CommitActivity {
       this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
 
       if(debug) {
-        this.core.startGroup('debug committers object')
-        this.core.info(JSON.stringify(result, null, 2));
-        this.core.endGroup();
+        core.startGroup('debug committers object')
+        core.info(JSON.stringify(result, null, 2));
+        core.endGroup();
       }
 
       return result;
