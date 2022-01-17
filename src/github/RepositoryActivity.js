@@ -13,7 +13,7 @@ module.exports = class RepositoryActivity {
     this._pullRequestActivity = new PullRequestActivity(octokit, core)
   }
 
-  async getActivity(repo, since) {
+  async getActivity(repo, since, debug) {
     const owner = repo.owner
       , name = repo.name
       , fullName = repo.full_name
@@ -21,26 +21,33 @@ module.exports = class RepositoryActivity {
       , issueActivity = this._issueActivity
       , prActivity = this._pullRequestActivity
       , data = {}
+      , core = this.core
     ;
 
     //TODO need some validation around the parameters
 
     console.log(`Building repository activity for: ${fullName}...`);
 
-    const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
+    const commits = await commitActivity.getCommitActivityFrom(owner, name, since, debug);
     data[UserActivityAttributes.COMMITS] = commits[fullName];
 
-    const issues = await issueActivity.getIssueActivityFrom(owner, name, since)
+    const issues = await issueActivity.getIssueActivityFrom(owner, name, since, debug)
     data[UserActivityAttributes.ISSUES] = issues[fullName];
 
-    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since, debug);
     data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
 
-    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since)
+    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since, debug)
     data[UserActivityAttributes.PULL_REQUEST_COMMENTS] = prComments[fullName];
 
     const results = {};
     results[fullName] = data;
+
+    if (debug) {
+      core.startGroup(`complete activity data`);
+      core.info(JSON.stringify(results, null, 2));
+      core.endGroup();
+    }
 
     console.log(`  completed.`);
     return results;

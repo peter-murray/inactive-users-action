@@ -27,7 +27,7 @@ async function run() {
     fromDate = dateUtil.convertDaysToDate(days);
   }
 
-  // Ensure that the output directory exists before we our limited API usage
+  // Ensure that the output directory exists before our limited API usage
   await io.mkdirP(outputDir)
 
   const octokit = githubClient.create(token, maxRetries)

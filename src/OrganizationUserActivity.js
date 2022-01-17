@@ -33,7 +33,12 @@ module.exports = class OrganizationUserActivity {
 
     const activityResults = {};
     for(let idx = 0; idx< repositories.length; idx++) {
-      const repoActivity = await self.repositoryClient.getActivity(repositories[idx], since);
+      const repoActivity = await self.repositoryClient.getActivity(repositories[idx], since, debug);
+
+      if(debug) {
+        core.info(`repository activity data: ${JSON.stringify(repoActivity)}`);
+      }
+
       Object.assign(activityResults, repoActivity);
     }
 

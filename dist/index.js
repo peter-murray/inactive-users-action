@@ -12773,7 +12773,12 @@ module.exports = class OrganizationUserActivity {
 
     const activityResults = {};
     for(let idx = 0; idx< repositories.length; idx++) {
-      const repoActivity = await self.repositoryClient.getActivity(repositories[idx], since);
+      const repoActivity = await self.repositoryClient.getActivity(repositories[idx], since, debug);
+
+      if(debug) {
+        core.info(`repository activity data: ${JSON.stringify(repoActivity)}`);
+      }
+
       Object.assign(activityResults, repoActivity);
     }
 
@@ -13027,7 +13032,7 @@ module.exports = class CommitActivity {
     this._core = core;
   }
 
-  getCommitActivityFrom(owner, repo, since) {
+  getCommitActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
     ;
@@ -13057,6 +13062,13 @@ module.exports = class CommitActivity {
       const result = {};
       result[repoFullName] = committers;
       this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
+
+      if(debug) {
+        this.core.startGroup('debug committers object')
+        this.core.info(JSON.stringify(result, null, 2));
+        this.core.endGroup();
+      }
+
       return result;
     })
       .catch(err => {
@@ -13104,7 +13116,7 @@ module.exports = class IssueActivity {
     this._core = core;
   }
 
-  getIssueActivityFrom(owner, repo, since) {
+  getIssueActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
     ;
@@ -13133,6 +13145,13 @@ module.exports = class IssueActivity {
 
       const data = {}
       data[repoFullName] = users;
+
+      if(debug) {
+        this.core.startGroup('debug issue activity object')
+        this.core.info(JSON.stringify(data, null, 2));
+        this.core.endGroup();
+      }
+
       return data;
     }).catch(err => {
       if (err.status === 404) {
@@ -13144,7 +13163,7 @@ module.exports = class IssueActivity {
     });
   }
 
-  getIssueCommentActivityFrom(owner, repo, since) {
+  getIssueCommentActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
     ;
@@ -13174,6 +13193,13 @@ module.exports = class IssueActivity {
       const data = {}
       data[repoFullName] = users;
       this.core.info(`    identified issue comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
+
+      if(debug) {
+        this.core.startGroup('debug issue comments object')
+        this.core.info(JSON.stringify(data, null, 2));
+        this.core.endGroup();
+      }
+
       return data;
     }).catch(err => {
       if (err.status === 404) {
@@ -13258,7 +13284,7 @@ module.exports = class PullRequestActivity {
     this._core = core;
   }
 
-  getPullRequestCommentActivityFrom(owner, repo, since) {
+  getPullRequestCommentActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
     ;
@@ -13289,6 +13315,12 @@ module.exports = class PullRequestActivity {
       result[repoFullName] = users;
 
       this.core.info(`    identified pull request comment activity for ${Object.keys(users).length} users in repository ${owner}/${repo}`);
+
+      if(debug) {
+        this.core.startGroup('debug pull request object')
+        this.core.info(JSON.stringify(result, null, 2));
+        this.core.endGroup();
+      }
       return result;
     })
       .catch(err => {
@@ -13334,7 +13366,7 @@ module.exports = class RepositoryActivity {
     this._pullRequestActivity = new PullRequestActivity(octokit, core)
   }
 
-  async getActivity(repo, since) {
+  async getActivity(repo, since, debug) {
     const owner = repo.owner
       , name = repo.name
       , fullName = repo.full_name
@@ -13342,26 +13374,33 @@ module.exports = class RepositoryActivity {
       , issueActivity = this._issueActivity
       , prActivity = this._pullRequestActivity
       , data = {}
+      , core = this.core
     ;
 
     //TODO need some validation around the parameters
 
     console.log(`Building repository activity for: ${fullName}...`);
 
-    const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
+    const commits = await commitActivity.getCommitActivityFrom(owner, name, since, debug);
     data[UserActivityAttributes.COMMITS] = commits[fullName];
 
-    const issues = await issueActivity.getIssueActivityFrom(owner, name, since)
+    const issues = await issueActivity.getIssueActivityFrom(owner, name, since, debug)
     data[UserActivityAttributes.ISSUES] = issues[fullName];
 
-    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since);
+    const issueComments = await issueActivity.getIssueCommentActivityFrom(owner, name, since, debug);
     data[UserActivityAttributes.ISSUE_COMMENTS] = issueComments[fullName];
 
-    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since)
+    const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since, debug)
     data[UserActivityAttributes.PULL_REQUEST_COMMENTS] = prComments[fullName];
 
     const results = {};
     results[fullName] = data;
+
+    if (debug) {
+      core.startGroup(`complete activity data`);
+      core.info(JSON.stringify(results, null, 2));
+      core.endGroup();
+    }
 
     console.log(`  completed.`);
     return results;
@@ -13650,7 +13689,7 @@ async function run() {
     fromDate = dateUtil.convertDaysToDate(days);
   }
 
-  // Ensure that the output directory exists before we our limited API usage
+  // Ensure that the output directory exists before our limited API usage
   await io.mkdirP(outputDir)
 
   const octokit = githubClient.create(token, maxRetries)

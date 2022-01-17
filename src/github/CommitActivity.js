@@ -10,7 +10,7 @@ module.exports = class CommitActivity {
     this._core = core;
   }
 
-  getCommitActivityFrom(owner, repo, since) {
+  getCommitActivityFrom(owner, repo, since, debug) {
     const from = util.getFromDate(since)
       , repoFullName = `${owner}/${repo}`
     ;
@@ -40,6 +40,13 @@ module.exports = class CommitActivity {
       const result = {};
       result[repoFullName] = committers;
       this.core.info(`    identified commit activity for ${Object.keys(committers).length} users in repository ${owner}/${repo}`);
+
+      if(debug) {
+        this.core.startGroup('debug committers object')
+        this.core.info(JSON.stringify(result, null, 2));
+        this.core.endGroup();
+      }
+
       return result;
     })
       .catch(err => {
