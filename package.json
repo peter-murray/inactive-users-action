@@ -1,6 +1,6 @@
 {
     "name": "inactive-users-action",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "GitHub Action for getting inactive organization members",
     "main": "index.js",
     "scripts": {

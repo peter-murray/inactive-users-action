@@ -37,6 +37,9 @@ module.exports = class RepositoryActivity {
     const prComments = await prActivity.getPullRequestCommentActivityFrom(owner, name, since)
     data[UserActivityAttributes.PULL_REQUEST_COMMENTS] = prComments[fullName];
 
+    const prReviews = await prActivity.getPullRequestReviewActivityFrom(owner, name, since, debug)
+    data[UserActivityAttributes.PULL_REQUEST_REVIEWS] = prReviews[fullName];
+
     const results = {};
     results[fullName] = data;
 

@@ -25,7 +25,7 @@ module.exports = class UserActivity {
     }
 
     get isActive() {
-        return (this.commits + this.pullRequestComments + this.issueComments + this.issues) > 0;
+        return (this.commits + this.pullRequestComments + this.issueComments + this.issues + this.pullRequestReviews) > 0;
     }
 
     increment(attribute, repo, amount) {
@@ -53,6 +53,10 @@ module.exports = class UserActivity {
 
     get issueComments() {
         return this._getTotal(UserActivityAttributes.ISSUE_COMMENTS);
+    }
+
+    get pullRequestReviews() {
+        return this._getTotal(UserActivityAttributes.PULL_REQUEST_REVIEWS);
     }
 
     get jsonPayload() {
