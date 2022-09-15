@@ -21,7 +21,7 @@ async function run() {
 
   let fromDate;
   if (since) {
-    console.log(`Since Date has been specified, using that instead of active_days`)
+    console.error(`Since Date has been specified, using that instead of active_days`)
     fromDate = dateUtil.getFromDate(since);
   } else {
     fromDate = dateUtil.convertDaysToDate(days);
@@ -34,19 +34,19 @@ async function run() {
     , orgActivity = new OrganizationActivity(octokit)
   ;
 
-  console.log(`Attempting to generate organization user activity data, this could take some time...`);
+  console.error(`Attempting to generate organization user activity data, this could take some time...`);
   const userActivity = await orgActivity.getUserActivity(organization, fromDate);
   saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
 
   // Convert the JavaScript objects into a JSON payload so it can be output
-  console.log(`User activity data captured, generating report...`);
+  console.error(`User activity data captured, generating report...`);
   const data = userActivity.map(activity => activity.jsonPayload)
     , csv = json2csv.parse(data, {})
   ;
 
   const file = path.join(outputDir, 'organization_user_activity.csv');
   fs.writeFileSync(file, csv);
-  console.log(`User Activity Report Generated: ${file}`);
+  console.error(`User Activity Report Generated: ${file}`);
 
   // Expose the output csv file
   core.setOutput('report_csv', file);

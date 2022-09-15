@@ -1,92 +1,8 @@
-module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 2932:
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
-
-// const github = require('@actions/github')
-//   , core = require('@actions/core')
-const fs = __webpack_require__(5747)
-  , path = __webpack_require__(5622)
-  , core = __webpack_require__(2186)
-  , io = __webpack_require__(7436)
-  , json2csv = __webpack_require__(9392)
-  , OrganizationActivity = __webpack_require__(6166)
-  , githubClient = __webpack_require__(8724)
-  , dateUtil = __webpack_require__(8087)
-;
-
-async function run() {
-  const since = core.getInput('since')
-    , days = core.getInput('activity_days')
-    , token = getRequiredInput('token')
-    , outputDir = getRequiredInput('outputDir')
-    , organization = getRequiredInput('organization')
-    , maxRetries = getRequiredInput('octokit_max_retries')
-  ;
-
-  let fromDate;
-  if (since) {
-    console.log(`Since Date has been specified, using that instead of active_days`)
-    fromDate = dateUtil.getFromDate(since);
-  } else {
-    fromDate = dateUtil.convertDaysToDate(days);
-  }
-
-  // Ensure that the output directory exists before we our limited API usage
-  await io.mkdirP(outputDir)
-
-  const octokit = githubClient.create(token, maxRetries)
-    , orgActivity = new OrganizationActivity(octokit)
-  ;
-
-  console.log(`Attempting to generate organization user activity data, this could take some time...`);
-  const userActivity = await orgActivity.getUserActivity(organization, fromDate);
-  saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
-
-  // Convert the JavaScript objects into a JSON payload so it can be output
-  console.log(`User activity data captured, generating report...`);
-  const data = userActivity.map(activity => activity.jsonPayload)
-    , csv = json2csv.parse(data, {})
-  ;
-
-  const file = path.join(outputDir, 'organization_user_activity.csv');
-  fs.writeFileSync(file, csv);
-  console.log(`User Activity Report Generated: ${file}`);
-
-  // Expose the output csv file
-  core.setOutput('report_csv', file);
-}
-
-async function execute() {
-  try {
-    await run();
-  } catch (err) {
-    core.setFailed(err.message);
-  }
-}
-execute();
-
-
-function getRequiredInput(name) {
-  return core.getInput(name, {required: true});
-}
-
-function saveIntermediateData(directory, data) {
-  try {
-    const file = path.join(directory, 'organization_user_activity.json');
-    fs.writeFileSync(file, JSON.stringify(data));
-    core.setOutput('report_json', file);
-  } catch (err) {
-    console.error(`Failed to save intermediate data: ${err}`);
-  }
-}
-
-/***/ }),
-
 /***/ 7351:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -98,8 +14,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__webpack_require__(2087));
-const utils_1 = __webpack_require__(5278);
+const os = __importStar(__nccwpck_require__(2037));
+const utils_1 = __nccwpck_require__(5278);
 /**
  * Commands
  *
@@ -172,7 +88,7 @@ function escapeProperty(s) {
 /***/ }),
 
 /***/ 2186:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -193,11 +109,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __webpack_require__(7351);
-const file_command_1 = __webpack_require__(717);
-const utils_1 = __webpack_require__(5278);
-const os = __importStar(__webpack_require__(2087));
-const path = __importStar(__webpack_require__(5622));
+const command_1 = __nccwpck_require__(7351);
+const file_command_1 = __nccwpck_require__(717);
+const utils_1 = __nccwpck_require__(5278);
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
 /**
  * The code to exit an action
  */
@@ -417,7 +333,7 @@ exports.getState = getState;
 /***/ }),
 
 /***/ 717:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -432,9 +348,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__webpack_require__(5747));
-const os = __importStar(__webpack_require__(2087));
-const utils_1 = __webpack_require__(5278);
+const fs = __importStar(__nccwpck_require__(7147));
+const os = __importStar(__nccwpck_require__(2037));
+const utils_1 = __nccwpck_require__(5278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -479,7 +395,7 @@ exports.toCommandValue = toCommandValue;
 /***/ }),
 
 /***/ 1962:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -494,9 +410,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const assert_1 = __webpack_require__(2357);
-const fs = __webpack_require__(5747);
-const path = __webpack_require__(5622);
+const assert_1 = __nccwpck_require__(9491);
+const fs = __nccwpck_require__(7147);
+const path = __nccwpck_require__(1017);
 _a = fs.promises, exports.chmod = _a.chmod, exports.copyFile = _a.copyFile, exports.lstat = _a.lstat, exports.mkdir = _a.mkdir, exports.readdir = _a.readdir, exports.readlink = _a.readlink, exports.rename = _a.rename, exports.rmdir = _a.rmdir, exports.stat = _a.stat, exports.symlink = _a.symlink, exports.unlink = _a.unlink;
 exports.IS_WINDOWS = process.platform === 'win32';
 function exists(fsPath) {
@@ -681,7 +597,7 @@ function isUnixExecutable(stats) {
 /***/ }),
 
 /***/ 7436:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -695,10 +611,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const childProcess = __webpack_require__(3129);
-const path = __webpack_require__(5622);
-const util_1 = __webpack_require__(1669);
-const ioUtil = __webpack_require__(1962);
+const childProcess = __nccwpck_require__(2081);
+const path = __nccwpck_require__(1017);
+const util_1 = __nccwpck_require__(3837);
+const ioUtil = __nccwpck_require__(1962);
 const exec = util_1.promisify(childProcess.exec);
 /**
  * Copies a file or folder.
@@ -1035,18 +951,18 @@ exports.createTokenAuth = createTokenAuth;
 /***/ }),
 
 /***/ 6762:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var universalUserAgent = __webpack_require__(5030);
-var beforeAfterHook = __webpack_require__(3682);
-var request = __webpack_require__(6234);
-var graphql = __webpack_require__(8467);
-var authToken = __webpack_require__(334);
+var universalUserAgent = __nccwpck_require__(5030);
+var beforeAfterHook = __nccwpck_require__(3682);
+var request = __nccwpck_require__(6234);
+var graphql = __nccwpck_require__(8467);
+var authToken = __nccwpck_require__(334);
 
 function _objectWithoutPropertiesLoose(source, excluded) {
   if (source == null) return {};
@@ -1217,15 +1133,15 @@ exports.Octokit = Octokit;
 /***/ }),
 
 /***/ 9440:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __webpack_require__(3287);
-var universalUserAgent = __webpack_require__(5030);
+var isPlainObject = __nccwpck_require__(3287);
+var universalUserAgent = __nccwpck_require__(5030);
 
 function lowercaseKeys(object) {
   if (!object) {
@@ -1615,15 +1531,15 @@ exports.endpoint = endpoint;
 /***/ }),
 
 /***/ 8467:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __webpack_require__(6234);
-var universalUserAgent = __webpack_require__(5030);
+var request = __nccwpck_require__(6234);
+var universalUserAgent = __nccwpck_require__(5030);
 
 const VERSION = "4.5.7";
 
@@ -3071,7 +2987,7 @@ exports.restEndpointMethods = restEndpointMethods;
 /***/ }),
 
 /***/ 6298:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
@@ -3080,7 +2996,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Bottleneck = _interopDefault(__webpack_require__(1174));
+var Bottleneck = _interopDefault(__nccwpck_require__(1174));
 
 // @ts-ignore
 async function errorRequest(octokit, state, error, options) {
@@ -3154,7 +3070,7 @@ exports.retry = retry;
 /***/ }),
 
 /***/ 9968:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
@@ -3163,7 +3079,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var BottleneckLight = _interopDefault(__webpack_require__(1174));
+var BottleneckLight = _interopDefault(__nccwpck_require__(1174));
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -3452,7 +3368,7 @@ exports.throttling = throttling;
 /***/ }),
 
 /***/ 537:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
@@ -3461,8 +3377,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deprecation = __webpack_require__(8932);
-var once = _interopDefault(__webpack_require__(1223));
+var deprecation = __nccwpck_require__(8932);
+var once = _interopDefault(__nccwpck_require__(1223));
 
 const logOnce = once(deprecation => console.warn(deprecation));
 /**
@@ -3515,7 +3431,7 @@ exports.RequestError = RequestError;
 /***/ }),
 
 /***/ 6234:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
@@ -3524,11 +3440,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __webpack_require__(9440);
-var universalUserAgent = __webpack_require__(5030);
-var isPlainObject = __webpack_require__(3287);
-var nodeFetch = _interopDefault(__webpack_require__(467));
-var requestError = __webpack_require__(537);
+var endpoint = __nccwpck_require__(9440);
+var universalUserAgent = __nccwpck_require__(5030);
+var isPlainObject = __nccwpck_require__(3287);
+var nodeFetch = _interopDefault(__nccwpck_require__(467));
+var requestError = __nccwpck_require__(537);
 
 const VERSION = "5.4.10";
 
@@ -3671,17 +3587,17 @@ exports.request = request;
 /***/ }),
 
 /***/ 5375:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var core = __webpack_require__(6762);
-var pluginRequestLog = __webpack_require__(8883);
-var pluginPaginateRest = __webpack_require__(4193);
-var pluginRestEndpointMethods = __webpack_require__(3044);
+var core = __nccwpck_require__(6762);
+var pluginRequestLog = __nccwpck_require__(8883);
+var pluginPaginateRest = __nccwpck_require__(4193);
+var pluginRestEndpointMethods = __nccwpck_require__(3044);
 
 const VERSION = "18.0.9";
 
@@ -3696,11 +3612,11 @@ exports.Octokit = Octokit;
 /***/ }),
 
 /***/ 3682:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __webpack_require__(4670)
-var addHook = __webpack_require__(5549)
-var removeHook = __webpack_require__(6819)
+var register = __nccwpck_require__(4670)
+var addHook = __nccwpck_require__(5549)
+var removeHook = __nccwpck_require__(6819)
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind
@@ -5476,14 +5392,14 @@ exports.isPlainObject = isPlainObject;
 /***/ }),
 
 /***/ 8505:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const { Transform } = __webpack_require__(2413);
-const JSON2CSVTransform = __webpack_require__(395);
-const { fastJoin } = __webpack_require__(5006);
+const { Transform } = __nccwpck_require__(2781);
+const JSON2CSVTransform = __nccwpck_require__(395);
+const { fastJoin } = __nccwpck_require__(5006);
 
 class JSON2CSVAsyncParser {
   constructor(opts, transformOpts) {
@@ -5543,14 +5459,14 @@ module.exports = JSON2CSVAsyncParser
 /***/ }),
 
 /***/ 210:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const os = __webpack_require__(2087);
-const lodashGet = __webpack_require__(9197);
-const { getProp, fastJoin, flattenReducer } = __webpack_require__(5006);
+const os = __nccwpck_require__(2037);
+const lodashGet = __nccwpck_require__(9197);
+const { getProp, fastJoin, flattenReducer } = __nccwpck_require__(5006);
 
 class JSON2CSVBase {
   constructor(opts) {
@@ -5737,13 +5653,13 @@ module.exports = JSON2CSVBase;
 /***/ }),
 
 /***/ 6688:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const JSON2CSVBase = __webpack_require__(210);
-const { fastJoin, flattenReducer } = __webpack_require__(5006);
+const JSON2CSVBase = __nccwpck_require__(210);
+const { fastJoin, flattenReducer } = __nccwpck_require__(5006);
 
 class JSON2CSVParser extends JSON2CSVBase {
   constructor(opts) {
@@ -5826,14 +5742,14 @@ module.exports = JSON2CSVParser;
 /***/ }),
 
 /***/ 395:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const { Transform } = __webpack_require__(2413);
-const Parser = __webpack_require__(1991);
-const JSON2CSVBase = __webpack_require__(210);
+const { Transform } = __nccwpck_require__(2781);
+const Parser = __nccwpck_require__(1991);
+const JSON2CSVBase = __nccwpck_require__(210);
 
 class JSON2CSVTransform extends Transform {
   constructor(opts, transformOpts) {
@@ -6037,17 +5953,17 @@ module.exports = JSON2CSVTransform;
 /***/ }),
 
 /***/ 9392:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const { Readable } = __webpack_require__(2413);
-const JSON2CSVParser = __webpack_require__(6688);
-const JSON2CSVAsyncParser = __webpack_require__(8505);
-const JSON2CSVTransform = __webpack_require__(395);
-const flatten = __webpack_require__(5641);
-const unwind = __webpack_require__(4703);
+const { Readable } = __nccwpck_require__(2781);
+const JSON2CSVParser = __nccwpck_require__(6688);
+const JSON2CSVAsyncParser = __nccwpck_require__(8505);
+const JSON2CSVTransform = __nccwpck_require__(395);
+const flatten = __nccwpck_require__(5641);
+const unwind = __nccwpck_require__(4703);
 
 module.exports.Parser = JSON2CSVParser;
 module.exports.AsyncParser = JSON2CSVAsyncParser;
@@ -6132,11 +6048,11 @@ module.exports = flatten;
 /***/ }),
 
 /***/ 4703:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
-const lodashGet = __webpack_require__(9197);
-const { setProp, unsetProp, flattenReducer } = __webpack_require__(5006);
+const lodashGet = __nccwpck_require__(9197);
+const { setProp, unsetProp, flattenReducer } = __nccwpck_require__(5006);
 
 function getUnwindablePaths(obj, currentPath) {
   return Object.keys(obj).reduce((unwindablePaths, key) => {
@@ -7631,7 +7547,7 @@ module.exports = get;
 /***/ }),
 
 /***/ 467:
-/***/ ((module, exports, __webpack_require__) => {
+/***/ ((module, exports, __nccwpck_require__) => {
 
 "use strict";
 
@@ -7640,11 +7556,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__webpack_require__(2413));
-var http = _interopDefault(__webpack_require__(8605));
-var Url = _interopDefault(__webpack_require__(8835));
-var https = _interopDefault(__webpack_require__(7211));
-var zlib = _interopDefault(__webpack_require__(8761));
+var Stream = _interopDefault(__nccwpck_require__(2781));
+var http = _interopDefault(__nccwpck_require__(3685));
+var Url = _interopDefault(__nccwpck_require__(7310));
+var https = _interopDefault(__nccwpck_require__(5687));
+var zlib = _interopDefault(__nccwpck_require__(9796));
 
 // Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
 
@@ -7795,7 +7711,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __webpack_require__(2877).convert;
+	convert = (__nccwpck_require__(2877).convert);
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -9278,7 +9194,7 @@ fetch.Promise = global.Promise;
 
 module.exports = exports = fetch;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.default = exports;
+exports["default"] = exports;
 exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
@@ -9288,9 +9204,9 @@ exports.FetchError = FetchError;
 /***/ }),
 
 /***/ 1223:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __webpack_require__(2940)
+var wrappy = __nccwpck_require__(2940)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -9403,11 +9319,11 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 6166:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const Organization = __webpack_require__(2987)
-  , RepositoryActivity = __webpack_require__(2490)
-  , UserActivity = __webpack_require__(9245)
+const Organization = __nccwpck_require__(2987)
+  , RepositoryActivity = __nccwpck_require__(2490)
+  , UserActivity = __nccwpck_require__(9245)
 ;
 
 
@@ -9492,9 +9408,9 @@ function generateUserActivityData(data) {
 /***/ }),
 
 /***/ 9245:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const UserActivityAttributes = __webpack_require__(5543);
+const UserActivityAttributes = __nccwpck_require__(5543);
 
 module.exports = class UserActivity {
 
@@ -9637,9 +9553,9 @@ function clearTime(date) {
 /***/ }),
 
 /***/ 5448:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const util = __webpack_require__(8087);
+const util = __nccwpck_require__(8087);
 
 module.exports = class CommitActivity {
 
@@ -9709,9 +9625,9 @@ module.exports = class CommitActivity {
 /***/ }),
 
 /***/ 3571:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const util = __webpack_require__(8087);
+const util = __nccwpck_require__(8087);
 
 module.exports = class IssueActivity {
 
@@ -9825,7 +9741,7 @@ module.exports = class Organization {
   getRepositories(org) {
     return this.octokit.paginate("GET /orgs/:org/repos", {org: org, per_page: 100})
       .then(repos => {
-        console.log(`Processing ${repos.length} repositories`);
+        console.error(`Processing ${repos.length} repositories`);
         return repos.map(repo => { return {
           name: repo.name,
           owner: org, //TODO verify this in not in the payload
@@ -9857,9 +9773,9 @@ module.exports = class Organization {
 /***/ }),
 
 /***/ 8626:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const util = __webpack_require__(8087);
+const util = __nccwpck_require__(8087);
 
 module.exports = class PullRequestActivity {
 
@@ -9924,12 +9840,12 @@ module.exports = class PullRequestActivity {
 /***/ }),
 
 /***/ 2490:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const CommitActivity = __webpack_require__(5448)
-  , IssueActivity = __webpack_require__(3571)
-  , PullRequestActivity = __webpack_require__(8626)
-  , UserActivityAttributes = __webpack_require__(5543)
+const CommitActivity = __nccwpck_require__(5448)
+  , IssueActivity = __nccwpck_require__(3571)
+  , PullRequestActivity = __nccwpck_require__(8626)
+  , UserActivityAttributes = __nccwpck_require__(5543)
 
 module.exports = class RepositoryActivity {
 
@@ -9951,7 +9867,7 @@ module.exports = class RepositoryActivity {
 
     //TODO need some validation around the parameters
 
-    console.log(`Building repository activity for: ${fullName}...`);
+    console.error(`Building repository activity for: ${fullName}...`);
 
     const commits = await commitActivity.getCommitActivityFrom(owner, name, since);
     data[UserActivityAttributes.COMMITS] = commits[fullName];
@@ -9968,7 +9884,7 @@ module.exports = class RepositoryActivity {
     const results = {};
     results[fullName] = data;
 
-    console.log(`  completed.`);
+    console.error(`  completed.`);
     return results;
 
     // Need to avoid triggering the chain so using async now
@@ -10002,11 +9918,11 @@ module.exports = class RepositoryActivity {
 /***/ }),
 
 /***/ 8724:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const {throttling} = __webpack_require__(9968)
-  , {retry} = __webpack_require__(6298)
-  , {Octokit} = __webpack_require__(5375)
+const {throttling} = __nccwpck_require__(9968)
+  , {retry} = __nccwpck_require__(6298)
+  , {Octokit} = __nccwpck_require__(5375)
 ;
 
 const RetryThrottlingOctokit = Octokit.plugin(throttling, retry);
@@ -10057,91 +9973,91 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 2357:
+/***/ 9491:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("assert");;
+module.exports = require("assert");
 
 /***/ }),
 
-/***/ 3129:
+/***/ 2081:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("child_process");;
+module.exports = require("child_process");
 
 /***/ }),
 
-/***/ 5747:
+/***/ 7147:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("fs");;
+module.exports = require("fs");
 
 /***/ }),
 
-/***/ 8605:
+/***/ 3685:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("http");;
+module.exports = require("http");
 
 /***/ }),
 
-/***/ 7211:
+/***/ 5687:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("https");;
+module.exports = require("https");
 
 /***/ }),
 
-/***/ 2087:
+/***/ 2037:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("os");;
+module.exports = require("os");
 
 /***/ }),
 
-/***/ 5622:
+/***/ 1017:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("path");;
+module.exports = require("path");
 
 /***/ }),
 
-/***/ 2413:
+/***/ 2781:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("stream");;
+module.exports = require("stream");
 
 /***/ }),
 
-/***/ 8835:
+/***/ 7310:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("url");;
+module.exports = require("url");
 
 /***/ }),
 
-/***/ 1669:
+/***/ 3837:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("util");;
+module.exports = require("util");
 
 /***/ }),
 
-/***/ 8761:
+/***/ 9796:
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("zlib");;
+module.exports = require("zlib");
 
 /***/ })
 
@@ -10151,10 +10067,11 @@ module.exports = require("zlib");;
 /******/ 	var __webpack_module_cache__ = {};
 /******/ 	
 /******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
+/******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -10166,7 +10083,7 @@ module.exports = require("zlib");;
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
-/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
 /******/ 			threw = false;
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
@@ -10179,10 +10096,91 @@ module.exports = require("zlib");;
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__webpack_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(2932);
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+// const github = require('@actions/github')
+//   , core = require('@actions/core')
+const fs = __nccwpck_require__(7147)
+  , path = __nccwpck_require__(1017)
+  , core = __nccwpck_require__(2186)
+  , io = __nccwpck_require__(7436)
+  , json2csv = __nccwpck_require__(9392)
+  , OrganizationActivity = __nccwpck_require__(6166)
+  , githubClient = __nccwpck_require__(8724)
+  , dateUtil = __nccwpck_require__(8087)
+;
+
+async function run() {
+  const since = core.getInput('since')
+    , days = core.getInput('activity_days')
+    , token = getRequiredInput('token')
+    , outputDir = getRequiredInput('outputDir')
+    , organization = getRequiredInput('organization')
+    , maxRetries = getRequiredInput('octokit_max_retries')
+  ;
+
+  let fromDate;
+  if (since) {
+    console.error(`Since Date has been specified, using that instead of active_days`)
+    fromDate = dateUtil.getFromDate(since);
+  } else {
+    fromDate = dateUtil.convertDaysToDate(days);
+  }
+
+  // Ensure that the output directory exists before we our limited API usage
+  await io.mkdirP(outputDir)
+
+  const octokit = githubClient.create(token, maxRetries)
+    , orgActivity = new OrganizationActivity(octokit)
+  ;
+
+  console.error(`Attempting to generate organization user activity data, this could take some time...`);
+  const userActivity = await orgActivity.getUserActivity(organization, fromDate);
+  saveIntermediateData(outputDir, userActivity.map(activity => activity.jsonPayload));
+
+  // Convert the JavaScript objects into a JSON payload so it can be output
+  console.error(`User activity data captured, generating report...`);
+  const data = userActivity.map(activity => activity.jsonPayload)
+    , csv = json2csv.parse(data, {})
+  ;
+
+  const file = path.join(outputDir, 'organization_user_activity.csv');
+  fs.writeFileSync(file, csv);
+  console.error(`User Activity Report Generated: ${file}`);
+
+  // Expose the output csv file
+  core.setOutput('report_csv', file);
+}
+
+async function execute() {
+  try {
+    await run();
+  } catch (err) {
+    core.setFailed(err.message);
+  }
+}
+execute();
+
+
+function getRequiredInput(name) {
+  return core.getInput(name, {required: true});
+}
+
+function saveIntermediateData(directory, data) {
+  try {
+    const file = path.join(directory, 'organization_user_activity.json');
+    fs.writeFileSync(file, JSON.stringify(data));
+    core.setOutput('report_json', file);
+  } catch (err) {
+    console.error(`Failed to save intermediate data: ${err}`);
+  }
+}
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
