@@ -7,6 +7,9 @@
         "build": "ncc build index.js",
         "test": "mocha ./src/**/*.test.js"
     },
+    "bin": {
+        "github-inactive-users": "bin/github-inactive-users.js"
+    },
     "keywords": [
         "github",
         "organizations",
@@ -21,7 +24,8 @@
         "@octokit/plugin-retry": "^3.0.4",
         "@octokit/plugin-throttling": "^3.3.3",
         "@octokit/rest": "^18.0.9",
-        "json2csv": "^5.0.4"
+        "json2csv": "^5.0.4",
+        "yargs": "^17.5.1"
     },
     "devDependencies": {
         "@vercel/ncc": "^0.34.0",
